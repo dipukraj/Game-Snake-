@@ -281,6 +281,12 @@
     function changeDirection(event) {
       if (!gameRunning) return;
       const key = event.key;
+
+      // Prevent default behavior for arrow keys to stop page scrolling
+      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(key)) {
+        event.preventDefault();
+      }
+
       if (key === 'ArrowUp' && direction.y === 0) {
         direction = { x: 0, y: -10 };
       } else if (key === 'ArrowDown' && direction.y === 0) {
