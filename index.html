@@ -137,6 +137,52 @@
     footer .social-icons a:has(i)::before {
       display: none;
     }
+
+    /* Mobile Control Buttons */
+    .control-btn {
+      width: 50px;
+      height: 50px;
+      font-size: 20px;
+      background: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: manipulation;
+    }
+
+    .control-btn:hover {
+      background: #45a049;
+      transform: scale(1.05);
+    }
+
+    .control-btn:active {
+      background: #3d8b40;
+      transform: scale(0.95);
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+      #mobileControls {
+        display: block !important;
+      }
+      
+      #instructions {
+        font-size: 0.9em;
+      }
+      
+      h1 {
+        font-size: 2em;
+      }
+      
+      canvas {
+        max-width: 100%;
+        height: auto;
+      }
+    }
   </style>
 </head>
 
@@ -149,6 +195,21 @@
   <button id="restartButton">Restart Game</button>
   <div id="instructions">
     Use arrow keys to move the snake. Eat the red food to grow and increase your score. Avoid walls and yourself!
+  </div>
+
+  <!-- Mobile Controls -->
+  <div id="mobileControls" style="display: none; margin-top: 20px;">
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; width: 150px; margin: 0 auto;">
+      <div></div>
+      <button class="control-btn" data-direction="up">↑</button>
+      <div></div>
+      <button class="control-btn" data-direction="left">←</button>
+      <div></div>
+      <button class="control-btn" data-direction="right">→</button>
+      <div></div>
+      <button class="control-btn" data-direction="down">↓</button>
+      <div></div>
+    </div>
   </div>
 
   <footer>
@@ -312,6 +373,38 @@
 
     document.addEventListener('keydown', changeDirection);
     restartButton.addEventListener('click', restartGame);
+
+    // Mobile Controls
+    function handleMobileControl(dir) {
+      if (!gameRunning) return;
+      
+      if (dir === 'up' && direction.y === 0) {
+        direction = { x: 0, y: -10 };
+      } else if (dir === 'down' && direction.y === 0) {
+        direction = { x: 0, y: 10 };
+      } else if (dir === 'left' && direction.x === 0) {
+        direction = { x: -10, y: 0 };
+      } else if (dir === 'right' && direction.x === 0) {
+        direction = { x: 10, y: 0 };
+      }
+    }
+
+    // Add event listeners to mobile control buttons
+    document.querySelectorAll('.control-btn').forEach(button => {
+      const dir = button.getAttribute('data-direction');
+      
+      // Touch events for mobile
+      button.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        handleMobileControl(dir);
+      });
+      
+      // Mouse events for desktop testing
+      button.addEventListener('click', (e) => {
+        e.preventDefault();
+        handleMobileControl(dir);
+      });
+    });
 
     function gameLoop() {
       update();
