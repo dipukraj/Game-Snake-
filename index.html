@@ -78,7 +78,7 @@
       text-align: center;
       margin-top: 40px;
       margin-bottom: 0px;
-      padding: 5px;
+      padding: 0px;
       color: #efecf3;
       font-size: 14px;
       user-select: none;
@@ -101,7 +101,8 @@
     }
 
     .social-box h4 {
-      margin-bottom: 15px;
+      margin-bottom: 10px;
+      margin-top: 0;
       font-size: 16px;
       color: #fff;
       text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
@@ -118,17 +119,60 @@
     footer .social-icons a {
       margin: 0 10px;
       text-decoration: none;
-      color: inherit;
+      color: #ffffff; /* White color by default */
       font-size: 22px;
-      transition: color 0.3s ease;
+      transition: all 0.3s ease;
       display: inline-block;
-      min-width: 24px;
-      min-height: 24px;
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid transparent;
+    }
+
+    footer .social-icons a:hover {
+      transform: scale(1.1);
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    /* Brand Colors for Social Media - Only on Hover */
+    footer .social-icons a[aria-label="Twitter"]:hover {
+      color: #1DA1F2; /* Twitter Blue */
+      background: rgba(29, 161, 242, 0.1);
+      border-color: rgba(29, 161, 242, 0.3);
+    }
+
+    footer .social-icons a[aria-label="LinkedIn"]:hover {
+      color: #0077B5; /* LinkedIn Blue */
+      background: rgba(0, 119, 181, 0.1);
+      border-color: rgba(0, 119, 181, 0.3);
+    }
+
+    footer .social-icons a[aria-label="GitHub"]:hover {
+      color: #333333; /* GitHub Black */
+      background: rgba(51, 51, 51, 0.1);
+      border-color: rgba(51, 51, 51, 0.3);
+    }
+
+    footer .social-icons a[aria-label="Website"]:hover {
+      color: #4CAF50; /* Website Green */
+      background: rgba(76, 175, 80, 0.1);
+      border-color: rgba(76, 175, 80, 0.3);
+    }
+
+    footer .social-icons a[aria-label="Instagram"]:hover {
+      color: #8a3ab9; /* Instagram Purple */
+      background: rgba(138, 58, 185, 0.1);
+      border-color: rgba(138, 58, 185, 0.3);
     }
 
     footer .social-icons a:hover {
       color: #f9f8f5;
       transform: scale(1.1);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
     }
 
     /* Fallback for when Font Awesome doesn't load */
@@ -243,7 +287,7 @@
   <footer>
     <div class="social-box">
       <h4>Developed with ✨Sukoon by Dipu K Raj ❤️</h4>
-      <p>&copy;2025 | All Rights Reserved.</p>
+      <p style="margin: 5px 0;">&copy;2025 | All Rights Reserved.</p>
       <div class="social-icons">
         <a href="https://www.twitter.com/@DipuKRaj" target="_blank" rel="noopener noreferrer" aria-label="Twitter">
           <i class="fab fa-twitter"></i>
