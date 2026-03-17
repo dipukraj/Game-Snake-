@@ -261,6 +261,7 @@
 <body>
   <h1>Snake Game</h1>
   <div id="score">Score: 0</div>
+  <div id="performanceRank" style="margin-left: 20px; font-size: 1.2em; font-weight: bold; color: #FFD700; display: none;"></div>
   <div id="gameContainer">
     <canvas id="gameCanvas" width="400" height="400"></canvas>
   </div>
@@ -312,6 +313,7 @@
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
     const scoreElement = document.getElementById('score');
+    const performanceRankElement = document.getElementById('performanceRank');
     const restartButton = document.getElementById('restartButton');
 
     canvas.width = 400;
@@ -322,9 +324,95 @@
     let food = { x: Math.floor(Math.random() * 40) * 10, y: Math.floor(Math.random() * 40) * 10 };
     let score = 0;
     let gameRunning = true;
+    let celebrationActive = false;
 
     // Web Audio API for sounds
     const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+    // Celebration particles array
+    let particles = [];
+    
+    // Particle class for celebration effect
+    class Particle {
+      constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        this.vx = (Math.random() - 0.5) * 4;
+        this.vy = (Math.random() - 0.5) * 4 - 2;
+        this.life = 1.0;
+        this.decay = 0.01;
+        this.size = Math.random() * 3 + 2;
+        this.color = `hsl(${Math.random() * 360}, 100%, 50%)`;
+      }
+
+      update() {
+        this.x += this.vx;
+        this.y += this.vy;
+        this.vy += 0.1; // gravity
+        this.life -= this.decay;
+      }
+
+      draw(ctx) {
+        ctx.save();
+        ctx.globalAlpha = this.life;
+        ctx.fillStyle = this.color;
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = this.color;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+
+    function createCelebration() {
+      // Create particles from center of canvas
+      for (let i = 0; i < 50; i++) {
+        particles.push(new Particle(canvas.width / 2, canvas.height / 2));
+      }
+      celebrationActive = true;
+      
+      // Play celebration sound
+      playCelebrationSound();
+    }
+
+    function playCelebrationSound() {
+      // Play ascending tones for celebration
+      setTimeout(() => playBeep(523, 150), 0);   // C
+      setTimeout(() => playBeep(659, 150), 100); // E
+      setTimeout(() => playBeep(784, 150), 200); // G
+      setTimeout(() => playBeep(1047, 300), 300); // High C
+    }
+
+    function drawCelebration() {
+      // Update and draw particles
+      particles = particles.filter(particle => particle.life > 0);
+      
+      particles.forEach(particle => {
+        particle.update();
+        particle.draw(ctx);
+      });
+
+      // Draw celebration text
+      if (celebrationActive && particles.length > 0) {
+        ctx.save();
+        ctx.font = 'bold 30px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillStyle = '#FFD700'; // Gold color
+        ctx.shadowBlur = 20;
+        ctx.shadowColor = '#FFD700';
+        
+        // Animated text
+        const time = Date.now() / 1000;
+        const scale = 1 + Math.sin(time * 5) * 0.1;
+        ctx.translate(canvas.width / 2, 50);
+        ctx.scale(scale, scale);
+        ctx.fillText('🎉 AWESOME! 🎉', 0, 0);
+        ctx.restore();
+      } else {
+        celebrationActive = false;
+      }
+    }
 
     function playBeep(frequency = 800, duration = 200, type = 'sine') {
       const oscillator = audioContext.createOscillator();
@@ -364,6 +452,11 @@
       ctx.strokeStyle = '#FFFFFF';
       ctx.lineWidth = 2;
       ctx.strokeRect(0, 0, canvas.width, canvas.height);
+
+      // Draw celebration effects on top
+      if (celebrationActive || particles.length > 0) {
+        drawCelebration();
+      }
     }
 
     function update() {
@@ -379,6 +472,14 @@
         scoreElement.textContent = 'Score: ' + score;
         food = { x: Math.floor(Math.random() * 40) * 10, y: Math.floor(Math.random() * 40) * 10 };
         playBeep(); // Play eat sound
+        
+        // Update performance rank display
+        updatePerformanceRank(score);
+        
+        // Check for 100+ score celebration
+        if (score >= 100 && score % 100 === 0) {
+          createCelebration();
+        }
       } else {
         snake.pop();
       }
@@ -396,21 +497,77 @@
       }
     }
 
+    function updatePerformanceRank(currentScore) {
+      const performance = getPerformanceMessage(currentScore);
+      performanceRankElement.textContent = performance.text;
+      performanceRankElement.style.color = performance.color;
+      performanceRankElement.style.display = 'inline';
+    }
+
+    function getPerformanceMessage(finalScore) {
+      console.log("getPerformanceMessage called with score:", finalScore);
+      
+      if (finalScore >= 500) {
+        return { text: "🏆 LEGENDARY! 🏆", color: "#FFD700" };
+      } else if (finalScore >= 300) {
+        return { text: "🌟 EXCELLENT! 🌟", color: "#FF6B6B" };
+      } else if (finalScore >= 200) {
+        return { text: "🎯 VERY GOOD! 🎯", color: "#4ECDC4" };
+      } else if (finalScore >= 100) {
+        return { text: "👍 GOOD! 👍", color: "#95E77E" };
+      } else if (finalScore >= 50) {
+        return { text: "💪 NICE TRY! 💪", color: "#FFE66D" };
+      } else {
+        return { text: "🎮 KEEP PRACTICING! 🎮", color: "#A8DADC" };
+      }
+    }
+
     function gameOver() {
       gameRunning = false;
       playGameOverSound(); // Play game over sound
       ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      // Debug: Log the score
+      console.log("Game Over - Final Score:", score);
+      
+      // Get performance message
+      const performance = getPerformanceMessage(score);
+      console.log("Performance Message:", performance);
+      
+      // Draw "Game Over" text
       ctx.fillStyle = '#FFFFFF';
       ctx.font = '30px Arial';
       ctx.textAlign = 'center';
-      ctx.fillText('Game Over', canvas.width / 2, canvas.height / 2);
+      ctx.fillText('Game Over', canvas.width / 2, canvas.height / 2 - 60);
+      
+      // Draw performance message with animation
+      ctx.save();
+      ctx.font = 'bold 25px Arial';
+      ctx.fillStyle = performance.color;
+      ctx.shadowBlur = 15;
+      ctx.shadowColor = performance.color;
+      ctx.fillText(performance.text, canvas.width / 2, canvas.height / 2 - 20);
+      ctx.restore();
+      
+      // Draw final score
+      ctx.fillStyle = '#FFFFFF';
       ctx.font = '20px Arial';
-      ctx.fillText('Final Score: ' + score, canvas.width / 2, canvas.height / 2 + 40);
+      ctx.fillText('Final Score: ' + score, canvas.width / 2, canvas.height / 2 + 20);
+      
+      // Draw motivational message
+      ctx.font = '16px Arial';
+      ctx.fillStyle = '#CCCCCC';
+      if (score >= 100) {
+        ctx.fillText('Amazing performance! You rocked it! 🎉', canvas.width / 2, canvas.height / 2 + 50);
+      } else if (score >= 50) {
+        ctx.fillText('Good job! Keep improving! 📈', canvas.width / 2, canvas.height / 2 + 50);
+      } else {
+        ctx.fillText('Practice makes perfect! Try again! 💪', canvas.width / 2, canvas.height / 2 + 50);
+      }
     }
 
     function changeDirection(event) {
-      if (!gameRunning) return;
       const key = event.key;
 
       // Prevent default behavior for arrow keys to stop page scrolling
@@ -436,6 +593,13 @@
       score = 0;
       scoreElement.textContent = 'Score: 0';
       gameRunning = true;
+      
+      // Reset particles and celebration
+      particles = [];
+      celebrationActive = false;
+      
+      // Reset performance rank display
+      performanceRankElement.style.display = 'none';
     }
 
     document.addEventListener('keydown', changeDirection);
